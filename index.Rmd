@@ -1,0 +1,32 @@
+---
+title: "Prediction Assignment Writeup"
+author: "Efrin Suresh"
+date: "9/18/2026"
+output: html_document
+---
+
+## Executive Summary
+This project predicts the manner of exercise execution (`classe` variable) using accelerometer data from belt, forearm, arm, and dumbbell sensors. A Random Forest classifier was trained on 70% of the training dataset after cleaning missing values and non-predictive variables.
+
+## Data Loading & Preprocessing
+```{r setup, message=FALSE, warning=FALSE}
+library(caret)
+library(randomForest)
+set.seed(12345)
+
+train_url <- "[https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv)"
+test_url  <- "[https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv)"
+
+training_raw <- read.csv(train_url, na.strings = c("NA", "#DIV/0!", ""))
+testing_raw  <- read.csv(test_url, na.strings = c("NA", "#DIV/0!", ""))
+
+# Remove columns with >70% NAs
+max_na <- 0.7 * nrow(training_raw)
+keep_cols <- colSums(is.na(training_raw)) < max_na
+training_clean <- training_raw[, keep_cols]
+testing_clean  <- testing_raw[, keep_cols]
+
+# Remove identification and timestamp columns (1:7)
+training_clean <- training_clean[, -(1:7)]
+testing_clean  <- testing_clean[, -(1:7)]
+training_clean$classe <- as.factor(training_clean$classe)
